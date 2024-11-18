@@ -1,0 +1,32 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5437/postgres
+    username:
+    password:
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  application:
+    name: middleware-service
+  flyway:
+    enabled: true
+    locations: /db/migration/schema
+    baseline-on-migrate: true
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    doc-expansion: none
+    path: /middleware-service/swagger-html
+
+logging:
+  level:
+    root: INFO
+    com.middleware_service: DEBUG

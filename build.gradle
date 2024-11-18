@@ -1,0 +1,149 @@
+plugins {
+	id 'org.springframework.boot' version '3.3.5'
+	id 'io.spring.dependency-management' version '1.1.6'
+	id 'java'
+	id 'maven-publish'
+	id 'jacoco'
+	id 'com.palantir.git-version' version '3.1.0'
+}
+
+group = 'com.middleware-service'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	sourceCompatibility = '17'
+}
+
+repositories {
+	mavenCentral()
+}
+
+ext {
+	set('mapstructVersion', "1.5.5.Final")
+	set('lombokMapstructBindingVersion', "0.2.0")
+	set('testContainerVersion', "1.19.3")
+	set('postgresVersion', "42.7.0")
+	set('springdocVersion', "2.3.0")
+	set('commonsIoVersion', "2.15.0")
+	set('orgJsonVersion', "20231013")
+	set('awaitilityVersion', "4.2.0")
+	set('dropwizardMetricsVersion', "4.2.22")
+	set('rerunnerVersion', "2.1.6")
+	set('jsoupVersion', "1.17.1")
+	set('springAddonsVersion', "7.1.15")
+	set('resilience4jVersion', '2.2.0')
+}
+
+dependencies {
+	// Micrometer and Actuator
+	implementation 'io.micrometer:micrometer-registry-prometheus'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+	// Spring Boot Starters
+	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-logging'
+
+	// OpenID Connect and OIDC support
+	implementation "com.c4-soft.springaddons:spring-addons-starter-oidc:${springAddonsVersion}"
+
+	// SpringDoc OpenAPI for Swagger UI
+	implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
+
+	// Jackson
+	implementation "com.fasterxml.jackson.core:jackson-annotations"
+	implementation "com.fasterxml.jackson.core:jackson-core"
+	implementation "com.fasterxml.jackson.core:jackson-databind"
+
+	// Lombok
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
+
+	// SLF4J
+	implementation "org.slf4j:slf4j-api"
+
+	// Third-party utilities
+	implementation "org.apache.commons:commons-lang3"
+	implementation "com.squareup.okhttp3:okhttp"
+	implementation "org.json:json:${orgJsonVersion}"
+
+	// MapStruct for mapping
+	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+	implementation "org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}"
+	annotationProcessor "org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}"
+
+	// Kafka
+	implementation "org.springframework.kafka:spring-kafka"
+
+	// Flyway for database migration (original implementation)
+	implementation 'org.flywaydb:flyway-core:10.15.2'
+	implementation 'org.flywaydb:flyway-database-postgresql'
+
+	// PostgreSQL Driver
+	implementation "org.postgresql:postgresql:${postgresVersion}"
+
+	// JSoup for HTML parsing
+	implementation "org.jsoup:jsoup:${jsoupVersion}"
+
+	// Testing libraries
+	testImplementation 'org.junit.jupiter:junit-jupiter-api'
+	testImplementation "org.awaitility:awaitility:${awaitilityVersion}"
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+	testImplementation 'io.rest-assured:rest-assured'
+	testImplementation 'org.junit.jupiter:junit-jupiter:5.11.0'
+	implementation 'org.junit.jupiter:junit-jupiter:5.11.0'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+
+	// TestContainers for integration testing
+	testImplementation "org.testcontainers:junit-jupiter"
+	testImplementation "org.testcontainers:kafka"
+	testImplementation "org.testcontainers:postgresql"
+	testImplementation "org.testcontainers:mongodb"
+
+	// Mocking and assertions
+	testImplementation "org.mockito:mockito-junit-jupiter"
+	testImplementation "org.mockito:mockito-core"
+	testImplementation "org.hamcrest:hamcrest"
+	testImplementation "org.springframework.kafka:spring-kafka-test"
+	testImplementation "io.dropwizard.metrics:metrics-graphite:${dropwizardMetricsVersion}"
+	testImplementation "io.github.artsok:rerunner-jupiter:${rerunnerVersion}"
+
+	// Resilience4j for fault tolerance
+	implementation "io.github.resilience4j:resilience4j-spring-boot2:${resilience4jVersion}"
+
+	// Development tools
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+	// Data faker for generating random test data
+	implementation 'net.datafaker:datafaker:2.3.1'
+
+	implementation 'com.blazebit:blaze-persistence-core-api-jakarta:1.6.12'
+	implementation 'com.blazebit:blaze-persistence-core-impl-jakarta:1.6.12'
+	implementation 'com.blazebit:blaze-persistence-integration-hibernate-6.2:1.6.12'
+}
+
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+bootRun {
+	def profile = project.findProperty('profile') ?: 'local'
+	args += "--spring.profiles.active=$profile"
+
+	// Detail configuration guide: https://docs.gradle.org/current/dsl/org.gradle.api.tasks.JavaExec.html
+	debugOptions {
+		port = 8717
+		suspend = false
+	}
+}
