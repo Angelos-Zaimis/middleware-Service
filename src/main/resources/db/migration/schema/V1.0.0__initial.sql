@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS ORDER (
+
+    id UUID PRIMARY KEY NOT NULL,
+    user_id UUID NOT NULL,
+    status VARCHAR(100) NOT NULL,
+    total DECIMAL(10, 2),
+    currency VARCHAR(100) NOT NULL
+
+)
