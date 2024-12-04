@@ -3,6 +3,7 @@ package com.middleware_service.middleware_service.entity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Cascade;
 
 import java.util.UUID;
 
@@ -10,10 +11,9 @@ import java.util.UUID;
 @Table(name = "order_products")
 @AllArgsConstructor
 @NoArgsConstructor
-public class Order_Product {
+public class OrderProduct {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(name = "name", nullable = false)
@@ -30,5 +30,6 @@ public class Order_Product {
 
     @ManyToOne
     @JoinColumn(name = "order_id")
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
     private Order order;
 }

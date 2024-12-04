@@ -6,8 +6,8 @@ import java.util.List;
 
 public class SpringDocTags {
 
-    public static final String CREATE_AN_ORDER = "API for creating orders";
-    public static final String CREATE_AN_ORDER_DESCRIPTION = "API for creating an orders";
+    public static final String CREATE_AN_ORDER = "API for creating order";
+    public static final String CREATE_AN_ORDER_DESCRIPTION = "API for creating an order";
 
     public static List<Tag> tags() {
         return List.of(
