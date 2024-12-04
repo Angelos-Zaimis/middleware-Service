@@ -3,19 +3,18 @@ package com.middleware_service.middleware_service.entity;
 
 import com.middleware_service.middleware_service.enums.Order_status;
 import jakarta.persistence.*;
-import jdk.jfr.Timestamp;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.Enumeration;
 import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Table(name = "order")
+@Table(name = "orders")
 @AllArgsConstructor
 @NoArgsConstructor
+@Setter
+@Getter
 public class Order {
 
     @Id
@@ -33,7 +32,7 @@ public class Order {
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "order")
-    Set<Order_Product> products;
+    Set<OrderProduct> products;
 
     @Column(name = "total", nullable = false)
     private Double total;
