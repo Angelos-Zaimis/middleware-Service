@@ -6,7 +6,6 @@ import com.middleware_service.middleware_service.dto.product.ProductTxDTO;
 import com.middleware_service.middleware_service.entity.Order;
 import com.middleware_service.middleware_service.entity.OrderProduct;
 import com.middleware_service.middleware_service.enums.Order_status;
-import com.middleware_service.middleware_service.exception.OrderDataAccessException;
 import com.middleware_service.middleware_service.mapper.OrderMapper;
 import com.middleware_service.middleware_service.mapper.ProductMapper;
 import com.middleware_service.middleware_service.repository.order.OrderRepository;
@@ -14,7 +13,6 @@ import com.middleware_service.middleware_service.service.kafka.KafkaService;
 import com.middleware_service.middleware_service.service.order.OrderService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -36,7 +34,7 @@ public class BarOrderHandleService implements OrderService {
             return retrieveAllUserOrders(userId);
         }
 
-        return retrieveOrders(orderId, userId);
+        return retrieveOrder(orderId, userId);
     }
 
     private List<OrderTxDTO> retrieveAllUserOrders(UUID userId) {
@@ -55,12 +53,8 @@ public class BarOrderHandleService implements OrderService {
     @Override
     @Transactional
     public void createOrder(OrderRxDTO orderRxDTO) {
-        try {
-            Order newOrder = createNewOrder(orderRxDTO);
-            orderRepository.save(newOrder);
-        } catch (DataAccessException e) {
-            throw new OrderDataAccessException("Error creating order", e);
-        }
+        Order newOrder = createNewOrder(orderRxDTO);
+        orderRepository.save(newOrder);
     }
 
     private Order createNewOrder(OrderRxDTO orderRxDTO) {
@@ -89,15 +83,11 @@ public class BarOrderHandleService implements OrderService {
     @Override
     @Transactional
     public void cancelOrder(UUID orderId) {
-        try {
-            Optional<Order> order = orderRepository.findById(orderId);
+        Optional<Order> order = orderRepository.findById(orderId);
 
-            if (order.isPresent()) {
-                order.get().setStatus(Order_status.CANCELLED);
-                orderRepository.save(order.get());
-            }
-        } catch (DataAccessException e) {
-            throw new OrderDataAccessException("Error canceling order", e);
+        if (order.isPresent()) {
+            order.get().setStatus(Order_status.CANCELLED);
+            orderRepository.save(order.get());
         }
     }
 }
