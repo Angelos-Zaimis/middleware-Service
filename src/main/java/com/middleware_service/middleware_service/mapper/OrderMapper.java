@@ -7,7 +7,7 @@ import com.middleware_service.middleware_service.entity.Order;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper()
+@Mapper(componentModel = "spring")
 public interface OrderMapper {
 
     @Mapping(target = "id", ignore = true)
@@ -20,5 +20,6 @@ public interface OrderMapper {
     @Mapping(target = "products", ignore = true)
     Order map(OrderRxDTO orderRxDTO);
 
+    @Mapping(target = "productIds", ignore = true)
     OrderTxDTO mapToTxDTO(Order order);
 }
