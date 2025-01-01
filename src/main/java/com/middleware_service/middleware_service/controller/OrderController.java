@@ -6,24 +6,24 @@ import com.middleware_service.middleware_service.service.order.BarOrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
 
-@Controller
-@RequestMapping("/orders/")
+@RestController
+@RequestMapping("orders")
 @RequiredArgsConstructor
 public class OrderController {
 
     private final BarOrderService barOrderService;
 
     @GetMapping(produces = "application/json")
-    public List<OrderTxDTO> retrieveOrders(
+    public ResponseEntity<List<OrderTxDTO>>retrieveOrders(
             @RequestParam(value = "orderId", required = false) UUID orderId,
-            @RequestParam(value = "userId", required = false) UUID userId ) {
-        return barOrderService.handleRetrieveOrders(orderId, userId);
+            @RequestParam(value = "userId") UUID userId ) {
+
+        return ResponseEntity.ok(barOrderService.handleRetrieveOrders(orderId, userId));
     }
 
     @PostMapping(produces = "application/json")

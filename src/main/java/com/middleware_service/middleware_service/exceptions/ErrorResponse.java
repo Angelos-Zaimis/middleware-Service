@@ -1,4 +1,4 @@
-package com.middleware_service.middleware_service.exception;
+package com.middleware_service.middleware_service.exceptions;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
