@@ -1,5 +1,7 @@
 package com.middleware_service.middleware_service.service.order;
 
+import com.middleware_service.middleware_service.dto.order.CancelOrderDTO;
+import com.middleware_service.middleware_service.dto.order.DeleteOrderDTO;
 import com.middleware_service.middleware_service.dto.order.OrderRxDTO;
 import com.middleware_service.middleware_service.dto.order.OrderTxDTO;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +24,12 @@ public class BarOrderService {
         orderService.createOrder(orderRxDTO);
     }
 
-    public void handleCancelOrder(UUID orderId) {
-        orderService.cancelOrder(orderId);
+    public void handleCancelOrder(CancelOrderDTO cancelOrderDTO) {
+        orderService.cancelOrder(cancelOrderDTO);
+    }
+
+    public void handleDeleteOrder(DeleteOrderDTO deleteOrderDTO) {
+        orderService.deleteOrder(deleteOrderDTO);
     }
 }
 

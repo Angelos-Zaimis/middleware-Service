@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -31,8 +32,10 @@ public class Order {
     @Column(updatable = false, name = "created_at")
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "order")
-    Set<OrderProduct> products;
+    @ElementCollection
+    @CollectionTable(name = "product_ids", joinColumns = @JoinColumn(name = "order_id"))
+    @Column(name = "product_id")
+    private Set<UUID> products = new HashSet<>();
 
     @Column(name = "total", nullable = false)
     private Double total;

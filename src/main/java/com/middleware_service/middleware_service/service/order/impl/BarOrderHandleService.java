@@ -1,14 +1,13 @@
 package com.middleware_service.middleware_service.service.order.impl;
 
+import com.middleware_service.middleware_service.dto.order.CancelOrderDTO;
+import com.middleware_service.middleware_service.dto.order.DeleteOrderDTO;
 import com.middleware_service.middleware_service.dto.order.OrderRxDTO;
 import com.middleware_service.middleware_service.dto.order.OrderTxDTO;
-import com.middleware_service.middleware_service.dto.product.ProductTxDTO;
 import com.middleware_service.middleware_service.entity.Order;
-import com.middleware_service.middleware_service.entity.OrderProduct;
 import com.middleware_service.middleware_service.enums.Order_status;
 import com.middleware_service.middleware_service.exceptions.ResourceNotFoundException;
 import com.middleware_service.middleware_service.mapper.OrderMapper;
-import com.middleware_service.middleware_service.mapper.ProductMapper;
 import com.middleware_service.middleware_service.repository.order.OrderRepository;
 import com.middleware_service.middleware_service.service.kafka.KafkaService;
 import com.middleware_service.middleware_service.service.order.OrderService;
@@ -17,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +23,6 @@ public class BarOrderHandleService implements OrderService {
 
     private final OrderMapper orderMapper;
     private final KafkaService kafkaService;
-    private final ProductMapper productMapper;
     private final OrderRepository orderRepository;
 
     @Override
@@ -72,33 +69,30 @@ public class BarOrderHandleService implements OrderService {
        Order newOrder = orderMapper.map(orderRxDTO);
        newOrder.setStatus(Order_status.PENDING);
 
-       assignProductsToOrder(newOrder, orderRxDTO);
-
        return newOrder;
-    }
-
-    private void assignProductsToOrder(Order newOrder, OrderRxDTO orderRxDTO) {
-        List<ProductTxDTO> productList = retrieveProducts(orderRxDTO.getProductIds());
-
-        newOrder.setProducts(mapProductToOrderProduct(productList));
-    }
-
-    private List<ProductTxDTO> retrieveProducts(List<UUID> productIds) {
-        return kafkaService.retrieveProducts(productIds);
-    }
-
-    private Set<OrderProduct> mapProductToOrderProduct(List<ProductTxDTO> productTxDTOS) {
-        return productTxDTOS.stream().map(productMapper::map).collect(Collectors.toSet());
     }
 
     @Override
     @Transactional
-    public void cancelOrder(UUID orderId) {
-        Optional<Order> order = orderRepository.findById(orderId);
+    public void cancelOrder(CancelOrderDTO cancelOrderDTO) {
+        Order order = orderRepository.findByIdAndUserId(cancelOrderDTO.getOrderId(), cancelOrderDTO.getUserId());
 
-        if (order.isPresent()) {
-            order.get().setStatus(Order_status.CANCELLED);
-            orderRepository.save(order.get());
+        if (order == null) {
+            throw new ResourceNotFoundException("Order not found for user: " + cancelOrderDTO.getUserId());
         }
+
+        orderRepository.save(order);
+    }
+
+    @Override
+    @Transactional
+    public void deleteOrder(DeleteOrderDTO deleteOrderDTO) {
+        Order order = orderRepository.findByIdAndUserId(deleteOrderDTO.getOrderId(), deleteOrderDTO.getUserId());
+
+        if (order == null) {
+            throw new ResourceNotFoundException("Order not found for user: " + deleteOrderDTO.getUserId());
+        }
+
+        orderRepository.delete(order);
     }
 }
