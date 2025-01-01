@@ -11,8 +11,9 @@ import org.springframework.context.annotation.Configuration;
 public class SpringDocConfig {
 
     @Bean
-    @ConditionalOnMissingBean(value = SpringDocConfig.class)
+    @ConditionalOnMissingBean(OpenAPI.class)
     static OpenAPI openAPI() {
+        System.out.println("Loading custom OpenAPI bean...");
         return new OpenAPI().tags(SpringDocTags.tags());
     }
 }

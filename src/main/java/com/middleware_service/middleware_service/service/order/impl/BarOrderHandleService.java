@@ -6,6 +6,7 @@ import com.middleware_service.middleware_service.dto.product.ProductTxDTO;
 import com.middleware_service.middleware_service.entity.Order;
 import com.middleware_service.middleware_service.entity.OrderProduct;
 import com.middleware_service.middleware_service.enums.Order_status;
+import com.middleware_service.middleware_service.exceptions.ResourceNotFoundException;
 import com.middleware_service.middleware_service.mapper.OrderMapper;
 import com.middleware_service.middleware_service.mapper.ProductMapper;
 import com.middleware_service.middleware_service.repository.order.OrderRepository;
@@ -38,16 +39,26 @@ public class BarOrderHandleService implements OrderService {
     }
 
     private List<OrderTxDTO> retrieveAllUserOrders(UUID userId) {
-        return orderRepository.findAllByUserId(userId).stream().map(orderMapper::mapToTxDTO).toList();
+        List<Order> orders = orderRepository.findAllByUserId(userId);
+
+        if (orders.isEmpty()) {
+            throw new ResourceNotFoundException("Orders not found for user: " + userId);
+        }
+
+        return orders.stream().map(orderMapper::mapToTxDTO).toList();
     }
 
     private List<OrderTxDTO> retrieveOrder(UUID orderId, UUID userId) {
         Order order = orderRepository.findByIdAndUserId(orderId, userId);
-        OrderTxDTO orderTxDTO = orderMapper.mapToTxDTO(order);
-        List<OrderTxDTO> orderTxDTOS = new ArrayList<>();
-        orderTxDTOS.add(orderTxDTO);
 
-        return orderTxDTOS;
+        if (order == null) {
+            throw new ResourceNotFoundException("Order not found for user: " + userId);
+        }
+
+        List<Order> orders = new ArrayList<>();
+        orders.add(order);
+
+        return orders.stream().map(orderMapper::mapToTxDTO).toList();
     }
 
     @Override
