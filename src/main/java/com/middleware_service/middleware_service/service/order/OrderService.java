@@ -1,5 +1,7 @@
 package com.middleware_service.middleware_service.service.order;
 
+import com.middleware_service.middleware_service.dto.order.CancelOrderDTO;
+import com.middleware_service.middleware_service.dto.order.DeleteOrderDTO;
 import com.middleware_service.middleware_service.dto.order.OrderRxDTO;
 import com.middleware_service.middleware_service.dto.order.OrderTxDTO;
 
@@ -12,5 +14,7 @@ public interface OrderService {
 
     void createOrder(OrderRxDTO orderRxDTO);
 
-    void cancelOrder(UUID orderId);
+    void cancelOrder(CancelOrderDTO cancelOrderDTO);
+
+    void deleteOrder(DeleteOrderDTO deleteOrderDTO);
 }

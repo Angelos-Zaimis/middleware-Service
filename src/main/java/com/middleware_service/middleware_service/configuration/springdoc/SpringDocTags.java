@@ -5,13 +5,12 @@ import io.swagger.v3.oas.models.tags.Tag;
 import java.util.List;
 
 public class SpringDocTags {
-
-    public static final String CREATE_AN_ORDER = "API for creating order";
-    public static final String CREATE_AN_ORDER_DESCRIPTION = "API for creating an order";
+    public static final String ORDERS = "API for orders";
+    public static final String ORDERS_DESCRIPTION = "API to manage orders";
 
     public static List<Tag> tags() {
         return List.of(
-                new Tag().name(CREATE_AN_ORDER).description(CREATE_AN_ORDER_DESCRIPTION)
+                new Tag().name(ORDERS).description(ORDERS_DESCRIPTION)
         );
     }
 }
