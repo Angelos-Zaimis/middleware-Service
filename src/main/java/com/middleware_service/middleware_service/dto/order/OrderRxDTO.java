@@ -18,5 +18,5 @@ public class OrderRxDTO {
 
     @NotNull(message = "Product IDs list must not be null")
     @NotEmpty(message = "Product IDs list must not be empty")
-    private List<@NotNull(message = "Product ID must not be null") UUID> productIds;
+    private List<ProductDTO> products;
 }

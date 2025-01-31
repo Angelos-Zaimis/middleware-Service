@@ -1,10 +1,7 @@
 package com.middleware_service.middleware_service.service.order.impl;
 
 import com.middleware_service.middleware_service.configuration.kafka.KafkaTopics;
-import com.middleware_service.middleware_service.dto.order.CancelOrderDTO;
-import com.middleware_service.middleware_service.dto.order.DeleteOrderDTO;
-import com.middleware_service.middleware_service.dto.order.OrderRxDTO;
-import com.middleware_service.middleware_service.dto.order.OrderTxDTO;
+import com.middleware_service.middleware_service.dto.order.*;
 import com.middleware_service.middleware_service.entity.Order;
 import com.middleware_service.middleware_service.enums.Order_status;
 import com.middleware_service.middleware_service.exceptions.ResourceNotFoundException;
@@ -75,18 +72,41 @@ public class BarOrderServiceImpl implements OrderService {
     private Order createNewOrder(OrderRxDTO orderRxDTO) {
        Order newOrder = orderMapper.map(orderRxDTO);
        newOrder.setStatus(Order_status.PENDING);
-       orderRepository.save(newOrder);
 
-        return newOrder;
+       addProductsToOrders(orderRxDTO, newOrder);
+
+        return orderRepository.save(newOrder);
+    }
+
+    private void addProductsToOrders(OrderRxDTO orderRxDTO, Order newOrder) {
+        List<UUID> productIds = new ArrayList<>();
+
+        for (ProductDTO pr : orderRxDTO.getProducts()) {
+            productIds.add(pr.getProductId());
+        }
+
+        newOrder.setProducts(productIds);
     }
 
     private void updateInventory(OrderRxDTO orderRxDTO) {
+        UpdateInventoryDTO updateInventoryDTO = createUpdateInventoryDTO(orderRxDTO);
 
-        sendKafkaMessage(orderRxDTO);
+        sendKafkaMessage(updateInventoryDTO);
     }
 
-    private void sendKafkaMessage(OrderRxDTO orderRxDTO) {
-        var result = kafkaTemplate.send(KafkaTopics.UPDATE_INVENTORY, orderRxDTO);
+    private UpdateInventoryDTO createUpdateInventoryDTO(OrderRxDTO orderRxDTO) {
+        UpdateInventoryDTO updateInventoryDTO = new UpdateInventoryDTO();
+        updateInventoryDTO.setUserId(orderRxDTO.getUserId());
+
+        for (ProductDTO productDTO : orderRxDTO.getProducts()) {
+            updateInventoryDTO.getProducts().add(productDTO);
+        }
+
+        return updateInventoryDTO;
+    }
+
+    private void sendKafkaMessage(UpdateInventoryDTO updateInventoryDTO) {
+        var result = kafkaTemplate.send(KafkaTopics.UPDATE_INVENTORY, updateInventoryDTO);
         result.whenComplete((msg, ex) -> {
             if (Objects.nonNull(ex)) {
                 log.warn("Producer send message unsuccessfully for event update inventory", ex);
