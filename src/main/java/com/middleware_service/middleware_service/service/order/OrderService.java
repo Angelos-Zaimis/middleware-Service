@@ -12,7 +12,7 @@ public interface OrderService {
 
     List<OrderTxDTO> retrieveOrders(UUID orderId, UUID userId);
 
-    void createOrder(OrderRxDTO orderRxDTO);
+    OrderTxDTO createOrder(OrderRxDTO orderRxDTO);
 
     void cancelOrder(CancelOrderDTO cancelOrderDTO);
 

@@ -1,5 +1,6 @@
 package com.middleware_service.middleware_service.service.order.impl;
 
+import com.middleware_service.middleware_service.configuration.kafka.KafkaTopics;
 import com.middleware_service.middleware_service.dto.order.CancelOrderDTO;
 import com.middleware_service.middleware_service.dto.order.DeleteOrderDTO;
 import com.middleware_service.middleware_service.dto.order.OrderRxDTO;
@@ -13,16 +14,19 @@ import com.middleware_service.middleware_service.service.kafka.KafkaService;
 import com.middleware_service.middleware_service.service.order.OrderService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
-public class BarOrderHandleService implements OrderService {
+public class BarOrderServiceImpl implements OrderService {
 
     private final OrderMapper orderMapper;
-    private final KafkaService kafkaService;
+    private KafkaTemplate<String, Object> kafkaTemplate;
     private final OrderRepository orderRepository;
 
     @Override
@@ -60,16 +64,36 @@ public class BarOrderHandleService implements OrderService {
 
     @Override
     @Transactional
-    public void createOrder(OrderRxDTO orderRxDTO) {
+    public OrderTxDTO createOrder(OrderRxDTO orderRxDTO) {
         Order newOrder = createNewOrder(orderRxDTO);
-        orderRepository.save(newOrder);
+
+        updateInventory(orderRxDTO);
+
+        return orderMapper.mapToTxDTO(newOrder);
     }
 
     private Order createNewOrder(OrderRxDTO orderRxDTO) {
        Order newOrder = orderMapper.map(orderRxDTO);
        newOrder.setStatus(Order_status.PENDING);
+       orderRepository.save(newOrder);
 
-       return newOrder;
+        return newOrder;
+    }
+
+    private void updateInventory(OrderRxDTO orderRxDTO) {
+
+        sendKafkaMessage(orderRxDTO);
+    }
+
+    private void sendKafkaMessage(OrderRxDTO orderRxDTO) {
+        var result = kafkaTemplate.send(KafkaTopics.UPDATE_INVENTORY, orderRxDTO);
+        result.whenComplete((msg, ex) -> {
+            if (Objects.nonNull(ex)) {
+                log.warn("Producer send message unsuccessfully for event update inventory", ex);
+            } else {
+                log.debug("Producer send message successfully for event update inventory");
+            }
+        });
     }
 
     @Override

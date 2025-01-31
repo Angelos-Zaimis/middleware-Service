@@ -32,6 +32,7 @@ ext {
 	set('jsoupVersion', "1.17.1")
 	set('springAddonsVersion', "7.1.15")
 	set('resilience4jVersion', '2.2.0')
+	set('querydslVersion', '5.1.0')
 }
 
 dependencies {
@@ -71,6 +72,9 @@ dependencies {
 	implementation "org.apache.commons:commons-lang3"
 	implementation "com.squareup.okhttp3:okhttp"
 	implementation "org.json:json:${orgJsonVersion}"
+
+	implementation "com.querydsl:querydsl-jpa:${querydslVersion}:jakarta"
+	annotationProcessor "com.querydsl:querydsl-apt:${querydslVersion}:jakarta"
 
 	// MapStruct for mapping
 	implementation "org.mapstruct:mapstruct:${mapstructVersion}"

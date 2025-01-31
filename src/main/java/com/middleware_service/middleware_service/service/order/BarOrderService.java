@@ -20,8 +20,8 @@ public class BarOrderService {
         return orderService.retrieveOrders(orderId, userId);
     }
 
-    public void handleCreateOrder(OrderRxDTO orderRxDTO) {
-        orderService.createOrder(orderRxDTO);
+    public OrderTxDTO handleCreateOrder(OrderRxDTO orderRxDTO) {
+        return orderService.createOrder(orderRxDTO);
     }
 
     public void handleCancelOrder(CancelOrderDTO cancelOrderDTO) {
