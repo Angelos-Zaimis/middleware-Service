@@ -1,9 +1,7 @@
 package com.middleware_service.middleware_service.service.order.impl;
 
-import com.middleware_service.middleware_service.dto.order.CancelOrderDTO;
-import com.middleware_service.middleware_service.dto.order.DeleteOrderDTO;
-import com.middleware_service.middleware_service.dto.order.OrderRxDTO;
-import com.middleware_service.middleware_service.dto.order.OrderTxDTO;
+import com.middleware_service.middleware_service.configuration.kafka.KafkaTopics;
+import com.middleware_service.middleware_service.dto.order.*;
 import com.middleware_service.middleware_service.entity.Order;
 import com.middleware_service.middleware_service.enums.Order_status;
 import com.middleware_service.middleware_service.exceptions.ResourceNotFoundException;
@@ -13,16 +11,19 @@ import com.middleware_service.middleware_service.service.kafka.KafkaService;
 import com.middleware_service.middleware_service.service.order.OrderService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
-public class BarOrderHandleService implements OrderService {
+public class BarOrderServiceImpl implements OrderService {
 
     private final OrderMapper orderMapper;
-    private final KafkaService kafkaService;
+    private KafkaTemplate<String, Object> kafkaTemplate;
     private final OrderRepository orderRepository;
 
     @Override
@@ -60,16 +61,59 @@ public class BarOrderHandleService implements OrderService {
 
     @Override
     @Transactional
-    public void createOrder(OrderRxDTO orderRxDTO) {
+    public OrderTxDTO createOrder(OrderRxDTO orderRxDTO) {
         Order newOrder = createNewOrder(orderRxDTO);
-        orderRepository.save(newOrder);
+
+        updateInventory(orderRxDTO);
+
+        return orderMapper.mapToTxDTO(newOrder);
     }
 
     private Order createNewOrder(OrderRxDTO orderRxDTO) {
        Order newOrder = orderMapper.map(orderRxDTO);
        newOrder.setStatus(Order_status.PENDING);
 
-       return newOrder;
+       addProductsToOrders(orderRxDTO, newOrder);
+
+        return orderRepository.save(newOrder);
+    }
+
+    private void addProductsToOrders(OrderRxDTO orderRxDTO, Order newOrder) {
+        List<UUID> productIds = new ArrayList<>();
+
+        for (ProductDTO pr : orderRxDTO.getProducts()) {
+            productIds.add(pr.getProductId());
+        }
+
+        newOrder.setProducts(productIds);
+    }
+
+    private void updateInventory(OrderRxDTO orderRxDTO) {
+        UpdateInventoryDTO updateInventoryDTO = createUpdateInventoryDTO(orderRxDTO);
+
+        sendKafkaMessage(updateInventoryDTO);
+    }
+
+    private UpdateInventoryDTO createUpdateInventoryDTO(OrderRxDTO orderRxDTO) {
+        UpdateInventoryDTO updateInventoryDTO = new UpdateInventoryDTO();
+        updateInventoryDTO.setUserId(orderRxDTO.getUserId());
+
+        for (ProductDTO productDTO : orderRxDTO.getProducts()) {
+            updateInventoryDTO.getProducts().add(productDTO);
+        }
+
+        return updateInventoryDTO;
+    }
+
+    private void sendKafkaMessage(UpdateInventoryDTO updateInventoryDTO) {
+        var result = kafkaTemplate.send(KafkaTopics.UPDATE_INVENTORY, updateInventoryDTO);
+        result.whenComplete((msg, ex) -> {
+            if (Objects.nonNull(ex)) {
+                log.warn("Producer send message unsuccessfully for event update inventory", ex);
+            } else {
+                log.debug("Producer send message successfully for event update inventory");
+            }
+        });
     }
 
     @Override

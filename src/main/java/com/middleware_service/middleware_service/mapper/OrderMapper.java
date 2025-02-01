@@ -17,7 +17,7 @@ public interface OrderMapper {
     @Mapping(target = "total", ignore = true)
     @Mapping(target = "currency", ignore = true)
     @Mapping(target = "vat", ignore = true)
-    @Mapping(target = "products", source = "productIds")
+    @Mapping(target = "products", ignore = true)
     Order map(OrderRxDTO orderRxDTO);
 
     @Mapping(target = "productIds", ignore = true)

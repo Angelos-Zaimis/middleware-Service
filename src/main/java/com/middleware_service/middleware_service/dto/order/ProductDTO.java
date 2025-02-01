@@ -7,13 +7,14 @@ import java.util.UUID;
 
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CancelOrderDTO {
+public class ProductDTO {
 
-    @NotNull(message = "Order id must not be null")
-    private UUID orderId;
+    @NotNull(message = "Product id must not be null")
+    private UUID productId;
 
-    @NotNull(message = "User id must not be null")
-    private UUID userId;
+    @NotNull(message = "Quantity must not be null")
+    private Integer quantity;
 }

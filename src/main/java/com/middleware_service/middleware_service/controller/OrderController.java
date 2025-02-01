@@ -44,9 +44,9 @@ public class OrderController {
     )
     @PostMapping(produces = "application/json")
     @ApiResponse(responseCode = "200", description = "Order created successfully")
-    private ResponseEntity<String> createOrder(@RequestBody @Valid OrderRxDTO orderRxDTO) {
-        barOrderService.handleCreateOrder(orderRxDTO);
-        return ResponseEntity.ok("Order created successfully");
+    private ResponseEntity<OrderTxDTO> createOrder(@RequestBody @Valid OrderRxDTO orderRxDTO) {
+        OrderTxDTO orderTxDTO = barOrderService.handleCreateOrder(orderRxDTO);
+        return ResponseEntity.ok(orderTxDTO);
     }
 
     @Operation(

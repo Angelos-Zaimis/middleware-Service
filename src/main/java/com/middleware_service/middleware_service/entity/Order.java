@@ -6,9 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "orders")
@@ -35,7 +33,7 @@ public class Order {
     @ElementCollection
     @CollectionTable(name = "product_ids", joinColumns = @JoinColumn(name = "order_id"))
     @Column(name = "product_id")
-    private Set<UUID> products = new HashSet<>();
+    private List<UUID> products = new ArrayList<>();
 
     @Column(name = "total", nullable = false)
     private Double total;

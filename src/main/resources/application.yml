@@ -1,5 +1,16 @@
-server:
-  port: 8080
+service:
+  host:
+    name: localhost
+    port: 8080
+    prefix:
+  auth:
+    prefix:
+    url: http://localhost
+  middleware:
+    inventory-url: http//${service.host.name}:8325/middleware-inventory
+
+jpa:
+  fallback-provider-id: 123123123
 
 spring:
   datasource:
@@ -17,6 +28,8 @@ spring:
     enabled: true
     locations: /db/migration/schema
     baseline-on-migrate: true
+  kafka:
+    bootstrap-servers: 127.0.0.1:29092
   security:
     oauth2:
       resourceserver:
