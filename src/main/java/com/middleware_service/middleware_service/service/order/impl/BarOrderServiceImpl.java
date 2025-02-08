@@ -1,6 +1,5 @@
 package com.middleware_service.middleware_service.service.order.impl;
 
-import com.middleware_service.middleware_service.configuration.kafka.KafkaTopics;
 import com.middleware_service.middleware_service.dto.order.*;
 import com.middleware_service.middleware_service.entity.Order;
 import com.middleware_service.middleware_service.enums.Order_status;
@@ -12,7 +11,6 @@ import com.middleware_service.middleware_service.service.order.OrderService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -23,8 +21,8 @@ import java.util.*;
 public class BarOrderServiceImpl implements OrderService {
 
     private final OrderMapper orderMapper;
-    private KafkaTemplate<String, Object> kafkaTemplate;
     private final OrderRepository orderRepository;
+    private final KafkaService kafkaService;
 
     @Override
     @Transactional
@@ -91,7 +89,7 @@ public class BarOrderServiceImpl implements OrderService {
     private void updateInventory(OrderRxDTO orderRxDTO) {
         UpdateInventoryDTO updateInventoryDTO = createUpdateInventoryDTO(orderRxDTO);
 
-        sendKafkaMessage(updateInventoryDTO);
+        kafkaService.sendKafkaUpdateInventoryMessage(updateInventoryDTO);
     }
 
     private UpdateInventoryDTO createUpdateInventoryDTO(OrderRxDTO orderRxDTO) {
@@ -103,17 +101,6 @@ public class BarOrderServiceImpl implements OrderService {
         }
 
         return updateInventoryDTO;
-    }
-
-    private void sendKafkaMessage(UpdateInventoryDTO updateInventoryDTO) {
-        var result = kafkaTemplate.send(KafkaTopics.UPDATE_INVENTORY, updateInventoryDTO);
-        result.whenComplete((msg, ex) -> {
-            if (Objects.nonNull(ex)) {
-                log.warn("Producer send message unsuccessfully for event update inventory", ex);
-            } else {
-                log.debug("Producer send message successfully for event update inventory");
-            }
-        });
     }
 
     @Override
