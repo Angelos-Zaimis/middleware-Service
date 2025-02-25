@@ -17,9 +17,9 @@ RUN curl -L "https://repo1.maven.org/maven2/io/fabric8/run-java-sh/${RUN_JAVA_VE
 
 ENV JAVA_OPTIONS="-XX:-OmitStackTraceInFastThrow"
 
-COPY build/libs/*.jar /app.jar
+COPY build/libs/middleware-service-0.0.1-SNAPSHOT.jar /app.jar
 
 EXPOSE 8080
 
 # Use the downloaded run-java-sh script as the entry point.
-ENTRYPOINT ["/app/run-java-sh"]
+ENTRYPOINT ["java","-jar","/app.jar"]
