@@ -14,9 +14,9 @@ jpa:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5437/datasource_servicedb
-    username:
-    password:
+    url: jdbc:postgresql://localhost:5009/datasource_servicedb
+    username: testuser
+    password: 11111
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
